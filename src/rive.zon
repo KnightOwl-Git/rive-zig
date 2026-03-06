@@ -126,7 +126,7 @@
         "animation/transition_input_condition.cpp",
         "animation/transition_number_condition.cpp",
         "animation/transition_property_comparator.cpp",
-        "animation/transition_property_viewmodel_compa",
+        "animation/transition_property_viewmodel_comparator.cpp",
         "animation/transition_trigger_condition.cpp",
         "animation/transition_viewmodel_condition.cpp",
 
