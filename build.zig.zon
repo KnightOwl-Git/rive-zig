@@ -11,6 +11,13 @@
             .url = "git+https://github.com/rive-app/rive-runtime.git#d72c94dfc45c4adf98e957b3df60f92b862dfd91",
             .hash = "N-V-__8AACKcQApb7xbEAkzxNHe88OHY_14Z1WjLQC25MuLq",
         },
+
+        //NOTE: python ply is no longer maintained - keep an eye out to see if Rive switches to something else
+
+        .python_ply = .{
+            .url = "git+https://github.com/dabeaz/ply.git#9d7c40099e23ff78f9d86ef69a26c1e8a83e706a",
+            .hash = "N-V-__8AAH6kCADCwVtPle9Dn5-H1bFPsR6r-yUhIzrvI1Af",
+        },
     },
 
     .paths = .{

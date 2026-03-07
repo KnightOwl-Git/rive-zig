@@ -558,14 +558,6 @@
 
         "profiler/profiler.cpp",
 
-        "script_input_artboard.cpp",
-        "script_input_boolean.cpp",
-        "script_input_color.cpp",
-        "script_input_number.cpp",
-        "script_input_string.cpp",
-        "script_input_trigger.cpp",
-        "script_input_viewmodel_property.cpp",
-
         "scripted/scripted_data_converter.cpp",
         "scripted/scripted_drawable.cpp",
         "scripted/scripted_layout.cpp",
@@ -692,7 +684,7 @@
         "decode_webp.cpp",
     },
 
-    .rive_renderer_generic = .{
+    .rive_renderer_src = .{
         "draw.cpp",
         "gpu.cpp",
         "gpu_resource.cpp",
