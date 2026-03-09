@@ -702,8 +702,8 @@
     },
 
     .rive_renderer_metal = .{
-        "background_shader_compiler.mm",
-        "render_context_metal_impl.mm",
+        "metal/background_shader_compiler.mm",
+        "metal/render_context_metal_impl.mm",
     },
 
     .rive_renderer_d3d = .{
@@ -718,14 +718,21 @@
     .rive_renderer_gl = .{
         "gl/gl_state.cpp",
         "gl/gl_utils.cpp",
-        "gl/load_gles_extensions.cpp",
+        // "gl/load_gles_extensions.cpp",
         "gl/load_store_actions_ext.cpp",
-        "gl/pls_impl_ext_native.cpp",
+        // "gl/pls_impl_ext_native.cpp",
         "gl/pls_impl_rw_texture.cpp",
         "gl/pls_impl_webgl.cpp",
         "gl/render_buffer_gl_impl.cpp",
         "gl/render_context_gl_impl.cpp",
         "gl/render_target_gl.cpp",
+    },
+
+    //TODO: can this be in the same list as gl?
+    .rive_renderer_glad = .{
+        "glad_custom.c",
+        "src/egl.c",
+        "src/gles2.c",
     },
 
     .rive_renderer_vulkan = .{
@@ -744,5 +751,16 @@
 
     .rive_renderer_webgpu = .{
         "webgpu/render_context_webgpu.cpp",
+    },
+    .path_fiddle = .{
+        "path_fiddle.cpp",
+        "fiddle_context_metal.mm",
+        "fiddle_context_dawn_helper.mm",
+        "fiddle_context_d3d.cpp",
+        "fiddle_context_d3d12.cpp",
+        "fiddle_context_dawn.cpp",
+        "fiddle_context_gl.cpp",
+        "fiddle_context_vulkan.cpp",
+        "microprofilestub.cpp",
     },
 }
