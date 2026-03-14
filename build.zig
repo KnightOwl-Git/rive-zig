@@ -78,6 +78,7 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
         .link_libcpp = true,
+        .link_libc = true,
     });
 
     const rive_renderer_lib = b.addLibrary(.{
@@ -105,8 +106,10 @@ pub fn build(b: *std.Build) !void {
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/glad"), "", .{});
 
     rive_renderer_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("renderer/src"), .allowed_exts = &.{".cpp"}, .flags = &.{"-std=c++20"} })); //Zig's Debug mode will panic if c++ standard isn't set to 20+ due to a negative bitwise shift operation
-    rive_renderer_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("renderer/src"), .allowed_exts = &.{".cpp"} })); //Zig's Debug mode will panic if c++ standard isn't set to 20+ due to a negative bitwise shift operation
-    rive_renderer_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("renderer/src/metal"), .allowed_exts = &.{".mm"} }));
+    rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        .root = upstream.path("renderer/src/metal"),
+        .allowed_exts = &.{".mm"},
+    }));
     rive_renderer_mod.addCSourceFiles(.{ .root = upstream.path("renderer"), .files = &.{
         "src/gl/gl_state.cpp",
         "src/gl/gl_utils.cpp",
@@ -121,6 +124,15 @@ pub fn build(b: *std.Build) !void {
         "glad/glad_custom.c",
     } });
 
+    // platform specific links
+
+    if (macos) {
+        rive_renderer_mod.linkFramework("Metal", .{});
+
+        rive_renderer_mod.linkFramework("Cocoa", .{});
+        rive_renderer_mod.linkFramework("QuartzCore", .{});
+        rive_renderer_mod.linkFramework("IOKit", .{});
+    }
     rive_renderer_mod.addCMacro("RIVE_DESKTOP_GL", "");
     rive_renderer_mod.addCMacro("RIVE_MACOSX", "");
 
@@ -178,28 +190,8 @@ pub fn build(b: *std.Build) !void {
     path_fiddle.step.dependOn(&rive_renderer_lib.step);
     path_fiddle.linkLibrary(glfw.artifact("glfw"));
 
-    // path_fiddle.root_module.addIncludePath(upstream.path("include"));
-    // path_fiddle.root_module.addIncludePath(upstream.path("renderer/include"));
-    // path_fiddle.root_module.addIncludePath(upstream.path("renderer/glad"));
-    // path_fiddle.root_module.addIncludePath(upstream.path("renderer/glad/include"));
-    // path_fiddle.root_module.addIncludePath(upstream.path("renderer/src"));
-    // path_fiddle.root_module.addIncludePath(b.path("zig-out/include"));
-    // std.debug.print("Ok so like: {s}", .{b.path("zig-out/include").getPath(b)});
-
     path_fiddle.root_module.addCMacro("RIVE_DESKTOP_GL", "");
     path_fiddle.root_module.addCMacro("RIVE_MACOSX", "");
-
-    // platform specific links
-
-    if (macos) {
-        path_fiddle.root_module.linkFramework("Metal", .{});
-
-        path_fiddle.root_module.linkFramework("Cocoa", .{});
-        path_fiddle.root_module.linkFramework("QuartzCore", .{});
-        path_fiddle.root_module.linkFramework("IOKit", .{});
-        // rive_renderer_mod.linkFramework("OpenGL", .{});
-        // path_fiddle.root_module.linkFramework("OpenGL", .{});
-    }
 
     //Add a run step that automatically runs Path Fiddle
 
