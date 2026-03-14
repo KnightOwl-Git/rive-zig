@@ -93,6 +93,7 @@ pub fn build(b: *std.Build) !void {
     //compile Rive Renderer
 
     // rive_renderer_mod.addIncludePath(upstream.path("include"));
+    rive_renderer_mod.linkLibrary(rive_lib);
     rive_renderer_mod.addIncludePath(upstream.path("renderer/include"));
     rive_renderer_mod.addIncludePath(upstream.path("renderer/src"));
     rive_renderer_mod.addIncludePath(upstream.path("renderer/glad/include"));
