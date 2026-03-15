@@ -55,6 +55,11 @@
             .url = "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/tarball/v3.3.0",
             .hash = "N-V-__8AAIutPgABk6NlXZhlJ5P8qVECvakZIKoO94h7xUOw",
         },
+        .mesa = .{
+            .url = "git+https://gitlab.freedesktop.org/mesa/mesa.git#5a84a6b775ba7cd855bd3ce019cf75b98859f527",
+            .hash = "N-V-__8AAJ1n4BU4TdZhPiZ17cG_BV3j4Tgw43C2b1kse5fe",
+            .lazy = true,
+        },
     },
 
     .paths = .{

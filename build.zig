@@ -32,9 +32,20 @@ pub fn build(b: *std.Build) !void {
         "Optimization mode (default is ReleaseSmall)",
     ) orelse .ReleaseSmall;
 
+    const glfw = b.dependency("glfw", .{
+        //GLFW is needed for path fiddle
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const glfw_lib = glfw.artifact("glfw");
+
     var windows = false;
     var linux = false;
     var macos = false;
+    var system_include_path: ?std.Build.LazyPath = null;
+    var system_framework_path: ?std.Build.LazyPath = null;
+    var library_path: ?std.Build.LazyPath = null;
     switch (target.result.os.tag) {
         .windows => {
             windows = true;
@@ -44,6 +55,19 @@ pub fn build(b: *std.Build) !void {
         },
         .macos => {
             macos = true;
+
+            //this code is taken from Castholm's SDL port
+            if (b.sysroot) |sysroot| {
+                system_include_path = .{ .cwd_relative = b.pathJoin(&.{ sysroot, "usr/include" }) };
+                system_framework_path = .{ .cwd_relative = b.pathJoin(&.{ sysroot, "System/Library/Frameworks" }) };
+                library_path = .{ .cwd_relative = "/usr/lib" };
+                // glfw_lib.addSystemIncludePath(.{ .cwd_relative = b.pathJoin(&.{ sysroot, "usr/include" }) });
+                // glfw_lib.addFrameworkPath(.{ .cwd_relative = b.pathJoin(&.{ sysroot, "System/Library/Frameworks" }) });
+                glfw_lib.addLibraryPath(library_path.?);
+            } else if (!target.query.isNative()) {
+                std.log.err("'--sysroot' is required when building the Rive Renderer for non-native macOS targets. Use xcrun --show-sdk-path.", .{});
+                std.process.exit(1);
+            }
         },
         else => {},
     }
@@ -55,12 +79,6 @@ pub fn build(b: *std.Build) !void {
     ) orelse .static;
 
     //Dependencies
-
-    const glfw = b.dependency("glfw", .{
-        //GLFW is needed for path fiddle
-        .target = target,
-        .optimize = optimize,
-    });
 
     const upstream = b.dependency("rive", .{});
 
@@ -208,6 +226,17 @@ pub fn build(b: *std.Build) !void {
 
     // platform specific links
 
+    if (system_include_path) |path| {
+        rive_renderer_mod.addSystemIncludePath(path);
+    }
+
+    if (system_framework_path) |path| {
+        rive_renderer_mod.addSystemFrameworkPath(path);
+    }
+    if (library_path) |path| {
+        rive_renderer_mod.addLibraryPath(path);
+    }
+
     if (macos) {
         rive_renderer_mod.addCMacro("RIVE_MACOSX", "");
         rive_renderer_mod.linkFramework("Metal", .{});
@@ -286,18 +315,25 @@ pub fn build(b: *std.Build) !void {
         // path_fiddle.root_module.addIncludePath(vulkan_memory_allocator.path("include"));
         path_fiddle.root_module.addIncludePath(upstream.path("renderer/rive_vk_bootstrap/include"));
         path_fiddle.root_module.addIncludePath(upstream.path("renderer/shader_hotload"));
-        path_fiddle.root_module.linkSystemLibrary("GL", .{});
+        // path_fiddle.root_module.linkSystemLibrary("GL", .{});
+        const opengl_headers = b.lazyDependency("mesa", .{}).?.path("include");
+        path_fiddle.root_module.addIncludePath(opengl_headers);
     }
     path_fiddle.linkLibrary(rive_renderer_lib);
     path_fiddle.linkLibrary(rive_lib);
 
     path_fiddle.step.dependOn(&rive_renderer_lib.step);
-    path_fiddle.linkLibrary(glfw.artifact("glfw"));
+    path_fiddle.linkLibrary(glfw_lib);
+
+    if (system_framework_path) |path| {
+        path_fiddle.addSystemFrameworkPath(path);
+    }
 
     path_fiddle.root_module.addCMacro("RIVE_DESKTOP_GL", "");
     if (macos) {
         path_fiddle.root_module.addCMacro("RIVE_MACOSX", "");
         path_fiddle.root_module.linkFramework("Metal", .{});
+        path_fiddle.root_module.linkSystemLibrary("objc", .{});
     }
 
     const run_exe = b.addRunArtifact(path_fiddle);
