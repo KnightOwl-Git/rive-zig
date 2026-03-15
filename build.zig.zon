@@ -47,6 +47,14 @@
             .url = "https://github.com/microsoft/DirectX-Headers/tarball/v1.615.0",
             .hash = "N-V-__8AAD63OgCRsCtozZ3AKD9eJ31jN38okB3nQSMU8Oa3",
         },
+        .@"Vulkan-Headers" = .{
+            .url = "https://github.com/KhronosGroup/Vulkan-Headers/tarball/vulkan-sdk-1.4.321",
+            .hash = "N-V-__8AAI7-AQIsx0GGCNZVZDEQ-EhVjVd915WjwOOiSSA-",
+        },
+        .VulkanMemoryAllocator = .{
+            .url = "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/tarball/v3.3.0",
+            .hash = "N-V-__8AAIutPgABk6NlXZhlJ5P8qVECvakZIKoO94h7xUOw",
+        },
     },
 
     .paths = .{

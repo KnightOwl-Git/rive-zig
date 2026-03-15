@@ -12,7 +12,7 @@ pub const GlobOptions = struct {
 pub fn glob(b: *std.Build, options: GlobOptions) !std.Build.Module.AddCSourceFilesOptions {
     var sources: std.ArrayList([]const u8) = .empty;
 
-    var dir = try std.fs.cwd().openDir(options.root.getPath(b), .{ .iterate = false });
+    var dir = try std.fs.cwd().openDir(options.root.getPath(b), .{ .iterate = true });
     defer dir.close();
     if (options.recursive) {
         var walker = try dir.walk(b.allocator);

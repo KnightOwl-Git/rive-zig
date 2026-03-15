@@ -129,6 +129,8 @@ pub fn build(b: *std.Build) !void {
     //compile Rive Renderer
 
     const dx12_headers = b.dependency("directX", .{});
+    const vulkan_headers = b.dependency("Vulkan-Headers", .{});
+    const vulkan_memory_allocator = b.dependency("VulkanMemoryAllocator", .{});
 
     // rive_renderer_mod.addIncludePath(upstream.path("include"));
     rive_renderer_mod.linkLibrary(rive_lib);
@@ -171,8 +173,24 @@ pub fn build(b: *std.Build) !void {
     } else if (linux) {
         rive_renderer_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/vulkan"),
-            .allowed_exts = &.{".mm"},
+            .allowed_exts = &.{".cpp"},
         }));
+
+        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/rive_vk_bootstrap/src"),
+            .allowed_exts = &.{".cpp"},
+        }));
+
+        rive_renderer_mod.addCMacro("RIVE_VULKAN", "");
+        rive_renderer_mod.addCMacro("VK_NO_PROTOTYPES", "");
+        rive_renderer_mod.addCMacro("VMA_STATIC_VULKAN_FUNCTIONS", "0");
+        rive_renderer_mod.addCMacro("VMA_DYNAMIC_VULKAN_FUNCTIONS", "1");
+
+        rive_renderer_mod.addIncludePath(vulkan_headers.path("include"));
+        rive_renderer_mod.addIncludePath(vulkan_memory_allocator.path("include"));
+        rive_renderer_mod.addIncludePath(upstream.path("renderer/rive_vk_bootstrap/include"));
+        rive_renderer_mod.addIncludePath(upstream.path("renderer/shader_hotload"));
+        rive_renderer_mod.addCSourceFile(.{ .file = upstream.path("renderer/shader_hotload/shader_hotload.cpp") });
     }
     rive_renderer_mod.addCSourceFiles(.{ .root = upstream.path("renderer"), .files = &.{
         "src/gl/gl_state.cpp",
@@ -240,6 +258,7 @@ pub fn build(b: *std.Build) !void {
 
     // *****PATH FIDDLE*******
 
+    //Note: in order to build the Path Fiddle demo project on Linux, you must have OpenGL dev tools installed even though it will use vulkan by default (i.e. libGL-mesa-dev or equivalent)
     const path_fiddle = b.addExecutable(.{ .name = "path_fiddle", .root_module = b.createModule(.{
         .link_libcpp = true,
         .target = target,
@@ -261,12 +280,14 @@ pub fn build(b: *std.Build) !void {
             .root = upstream.path("renderer/path_fiddle"),
         });
     }
-    // } else if (linux) {
-    //     path_fiddle.root_module.addCSourceFiles(.{
-    //         .files = &.{"fiddle_context_vulkan.cpp"},
-    //         .root = upstream.path("renderer/path_fiddle"),
-    //     });
-    // }
+    if (linux) {
+        path_fiddle.root_module.addCMacro("RIVE_VULKAN", "");
+        // path_fiddle.root_module.addIncludePath(vulkan_headers.path("include"));
+        // path_fiddle.root_module.addIncludePath(vulkan_memory_allocator.path("include"));
+        path_fiddle.root_module.addIncludePath(upstream.path("renderer/rive_vk_bootstrap/include"));
+        path_fiddle.root_module.addIncludePath(upstream.path("renderer/shader_hotload"));
+        path_fiddle.root_module.linkSystemLibrary("GL", .{});
+    }
     path_fiddle.linkLibrary(rive_renderer_lib);
     path_fiddle.linkLibrary(rive_lib);
 
