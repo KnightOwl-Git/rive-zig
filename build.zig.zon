@@ -8,10 +8,9 @@
     .dependencies = .{
         .rive = .{
             //last fetched 3/6/26
-            .url = "git+https://github.com/rive-app/rive-runtime.git#d72c94dfc45c4adf98e957b3df60f92b862dfd91",
-            .hash = "N-V-__8AACKcQApb7xbEAkzxNHe88OHY_14Z1WjLQC25MuLq",
+            .url = "git+https://github.com/rive-app/rive-runtime/#8bb659992d81f6f53a72ea21f7079149a1b8fced",
+            .hash = "N-V-__8AAHPqYAoPosyOJGKPgC_hBPd9l4PKwVRDNy4wpTHe",
         },
-
         //NOTE: python ply is no longer maintained - keep an eye out to see if Rive switches to something else
 
         .python_ply = .{
@@ -21,6 +20,32 @@
         .glfw = .{
             .url = "git+https://github.com/allyourcodebase/glfw.git#79e7ba3d082765954b59c4f11a2f9b4ff1ecb350",
             .hash = "glfw-0.0.0-R5AeUo0JGgBvENV2Oz-u0V_unpWhEJTfK4qckBH5da6e",
+        },
+        .harfbuzz = .{
+            .url = "https://github.com/rive-app/harfbuzz/tarball/rive_13.1.1",
+            .hash = "N-V-__8AAKRr0wX-LmkhKHJpyevrbB7LtHGnuNjgmA7jALxo",
+        },
+
+        .yoga = .{
+            .url = "https://github.com/rive-app/yoga/archive/rive_changes_v2_0_1_2.tar.gz",
+            .hash = "N-V-__8AAM2VVgCwroTrKUeYZbuSyNUsEuNhnq9mpSwtGlm3",
+        },
+        .sheenbidi = .{
+            .url = "https://github.com/Tehreer/SheenBidi/archive/refs/tags/v2.6.tar.gz",
+            .hash = "N-V-__8AANupEwHXvbeQLcLdZQ3WXMgqkgR03hg8pV843VL0",
+        },
+        .luau = .{
+            .url = "https://github.com/luigi-rosso/luau/tarball/rive_0_33",
+            .hash = "N-V-__8AAJHAsQD4olFtTzeo2TF4M57mK_1LiL_aWyT_6acO",
+        },
+
+        .libhydrogen = .{
+            .url = "https://github.com/KnightOwl-Git/libhydrogen/tarball/rive_0_1",
+            .hash = "N-V-__8AAHsTAwB23khMfi2wOKr0T75w9lHgO5eG9OVwDR7p",
+        },
+        .directX = .{
+            .url = "https://github.com/microsoft/DirectX-Headers/tarball/v1.615.0",
+            .hash = "N-V-__8AAD63OgCRsCtozZ3AKD9eJ31jN38okB3nQSMU8Oa3",
         },
     },
 

@@ -1,5 +1,16 @@
 ///based on allyourcodebases/SDL3 and Castholm's version
 const std = @import("std");
+const util = @import("src/util.zig");
+const glob = util.glob;
+const InstallArtifactFmt = util.InstallArtifactFmt;
+
+const riveSource = @import("src/rive.zon");
+
+//Libraries Rive depends on
+const yoga = @import("src/yoga.zig");
+const sheenbidi = @import("src/sheenbidi.zig");
+const harfbuzz = @import("src/harfbuzz.zig");
+const luau = @import("src/luau.zig");
 
 pub const rive_options = &.{
     "no-scripting",
@@ -15,7 +26,11 @@ pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
 
     //TODO: Prefer releaseSmall
-    const optimize = b.standardOptimizeOption(.{});
+    const optimize = b.option(
+        std.builtin.OptimizeMode,
+        "optimize",
+        "Optimization mode (default is ReleaseSmall)",
+    ) orelse .ReleaseSmall;
 
     var windows = false;
     var linux = false;
@@ -51,10 +66,13 @@ pub fn build(b: *std.Build) !void {
 
     //********RIVE CORE**********
 
+    // dependency links
+
     const rive_mod = b.createModule(.{
         .target = target,
         .optimize = optimize,
         .link_libcpp = true,
+        .link_libc = true,
     });
 
     const rive_lib = b.addLibrary(.{
@@ -63,14 +81,31 @@ pub fn build(b: *std.Build) !void {
         .linkage = linkage,
     });
 
-    b.installArtifact(rive_lib);
+    InstallArtifactFmt(rive_lib);
+
+    //optional dependencies
+
+    //is there a way for both of these functions to use the same parameters?
+    yoga.build(b, target, optimize, rive_mod);
+    sheenbidi.build(b, target, optimize, rive_mod);
+    harfbuzz.build(b, target, optimize, rive_mod);
+    try luau.build(b, target, optimize, rive_mod);
 
     rive_mod.addIncludePath(upstream.path("include"));
+    rive_mod.addIncludePath(upstream.path("dependencies"));
+    // rive_mod.addIncludePath(upstream.path("scripting"));
     rive_lib.installHeadersDirectory(upstream.path("include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
 
     //compile Rive source
     rive_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("src"), .allowed_exts = &.{".cpp"}, .recursive = true })); //Zig's Debug mode will panic if c++ standard isn't set to 20+ due to a negative bitwise shift operation
+    // rive_mod.addCSourceFiles(.{ .files = &riveSource.rive_src, .root = upstream.path("src") });
     rive_mod.addCMacro("_RIVE_INTERNAL_", "");
+
+    //TODO: Make macros optional
+
+    rive_mod.addCMacro("WITH_RIVE_TEXT", "");
+    rive_mod.addCMacro("WITH_RIVE_LAYOUT", "");
+    rive_mod.addCMacro("WITH_RIVE_SCRIPTING", "");
 
     //******RIVE RENDERER*******
 
@@ -87,11 +122,13 @@ pub fn build(b: *std.Build) !void {
         .linkage = linkage,
     });
 
-    b.installArtifact(rive_renderer_lib);
+    InstallArtifactFmt(rive_renderer_lib);
 
     // Set the include path
 
     //compile Rive Renderer
+
+    const dx12_headers = b.dependency("directX", .{});
 
     // rive_renderer_mod.addIncludePath(upstream.path("include"));
     rive_renderer_mod.linkLibrary(rive_lib);
@@ -106,10 +143,37 @@ pub fn build(b: *std.Build) !void {
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/glad"), "", .{});
 
     rive_renderer_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("renderer/src"), .allowed_exts = &.{".cpp"}, .flags = &.{"-std=c++20"} })); //Zig's Debug mode will panic if c++ standard isn't set to 20+ due to a negative bitwise shift operation
-    rive_renderer_mod.addCSourceFiles(try glob(b, .{
-        .root = upstream.path("renderer/src/metal"),
-        .allowed_exts = &.{".mm"},
-    }));
+    if (macos) {
+        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/metal"),
+            .allowed_exts = &.{".mm"},
+        }));
+    } else if (windows) {
+        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/vulkan"),
+            .allowed_exts = &.{".mm"},
+        }));
+
+        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/d3d"),
+            .allowed_exts = &.{".cpp"},
+        }));
+
+        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/d3d11"),
+            .allowed_exts = &.{".cpp"},
+        }));
+
+        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/d3d12"),
+            .allowed_exts = &.{".cpp"},
+        }));
+    } else if (linux) {
+        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/vulkan"),
+            .allowed_exts = &.{".mm"},
+        }));
+    }
     rive_renderer_mod.addCSourceFiles(.{ .root = upstream.path("renderer"), .files = &.{
         "src/gl/gl_state.cpp",
         "src/gl/gl_utils.cpp",
@@ -127,18 +191,15 @@ pub fn build(b: *std.Build) !void {
     // platform specific links
 
     if (macos) {
+        rive_renderer_mod.addCMacro("RIVE_MACOSX", "");
         rive_renderer_mod.linkFramework("Metal", .{});
-
-        rive_renderer_mod.linkFramework("Cocoa", .{});
-        rive_renderer_mod.linkFramework("QuartzCore", .{});
-        rive_renderer_mod.linkFramework("IOKit", .{});
-    }
+        rive_renderer_mod.linkFramework("Foundation", .{});
+    } else if (windows) {
+        rive_renderer_mod.addIncludePath(dx12_headers.path("include/directx"));
+    } else if (linux) {}
     rive_renderer_mod.addCMacro("RIVE_DESKTOP_GL", "");
-    rive_renderer_mod.addCMacro("RIVE_MACOSX", "");
 
     //compile Rive shaders for renderer
-
-    // TODO: See if cross compilation is possible
 
     //TODO: see if I can do this directly in zig instead of relying on the makefile
 
@@ -168,6 +229,11 @@ pub fn build(b: *std.Build) !void {
 
     if (macos) {
         make_cmd.addArg("rive_pls_macosx_metallib");
+    } else if (windows) {
+        make_cmd.addArg("d3d");
+        // make_cmd.addArg("spirv");
+    } else if (linux) {
+        make_cmd.addArg("spirv");
     }
     rive_renderer_lib.step.dependOn(&make_cmd.step);
     rive_renderer_mod.addIncludePath(b.path("zig-out/include"));
@@ -178,12 +244,29 @@ pub fn build(b: *std.Build) !void {
         .link_libcpp = true,
         .target = target,
         .optimize = optimize,
+        .link_libc = true,
     }) });
 
-    b.installArtifact(path_fiddle);
+    InstallArtifactFmt(path_fiddle);
 
-    //TODO: only add -fobj-arc if on mac
-    path_fiddle.root_module.addCSourceFiles(try glob(b, .{ .root = upstream.path("renderer/path_fiddle"), .allowed_exts = &.{ ".cpp", ".mm" }, .flags = &.{"-fobjc-arc"} }));
+    path_fiddle.root_module.addCSourceFiles(.{
+        .files = &.{ "path_fiddle.cpp", "fiddle_context_gl.cpp", "fiddle_context_vulkan.cpp", "fiddle_context_dawn.cpp", "fiddle_context_d3d.cpp", "fiddle_context_d3d12.cpp" },
+        .root = upstream.path("renderer/path_fiddle"),
+    });
+
+    if (macos) {
+        path_fiddle.root_module.addCSourceFiles(.{
+            .files = &.{"fiddle_context_metal.mm"},
+            .flags = &.{"-fobjc-arc"},
+            .root = upstream.path("renderer/path_fiddle"),
+        });
+    }
+    // } else if (linux) {
+    //     path_fiddle.root_module.addCSourceFiles(.{
+    //         .files = &.{"fiddle_context_vulkan.cpp"},
+    //         .root = upstream.path("renderer/path_fiddle"),
+    //     });
+    // }
     path_fiddle.linkLibrary(rive_renderer_lib);
     path_fiddle.linkLibrary(rive_lib);
 
@@ -191,52 +274,13 @@ pub fn build(b: *std.Build) !void {
     path_fiddle.linkLibrary(glfw.artifact("glfw"));
 
     path_fiddle.root_module.addCMacro("RIVE_DESKTOP_GL", "");
-    path_fiddle.root_module.addCMacro("RIVE_MACOSX", "");
-
-    //Add a run step that automatically runs Path Fiddle
+    if (macos) {
+        path_fiddle.root_module.addCMacro("RIVE_MACOSX", "");
+        path_fiddle.root_module.linkFramework("Metal", .{});
+    }
 
     const run_exe = b.addRunArtifact(path_fiddle);
     const run_step = b.step("run", "Run Path Fiddle");
 
     run_step.dependOn(&run_exe.step);
-}
-
-pub const GlobOptions = struct {
-    root: std.Build.LazyPath,
-    allowed_exts: []const []const u8,
-    recursive: bool = false,
-    flags: []const []const u8 = &.{},
-    language: ?std.Build.Module.CSourceLanguage = null,
-};
-
-fn glob(b: *std.Build, options: GlobOptions) !std.Build.Module.AddCSourceFilesOptions {
-    var sources: std.ArrayList([]const u8) = .empty;
-
-    var dir = try std.fs.cwd().openDir(options.root.getPath(b), .{ .iterate = false });
-    defer dir.close();
-    if (options.recursive) {
-        var walker = try dir.walk(b.allocator);
-        while (try walker.next()) |entry| {
-            const ext = std.fs.path.extension(entry.basename);
-            const include_file = for (options.allowed_exts) |e| {
-                if (std.mem.eql(u8, ext, e)) break true;
-            } else false;
-            if (include_file) {
-                try sources.append(b.allocator, b.dupe(entry.path));
-            }
-        }
-    } else {
-        var iterator = dir.iterate();
-        while (try iterator.next()) |entry| {
-            const ext = std.fs.path.extension(entry.name);
-            const include_file = for (options.allowed_exts) |e| {
-                if (std.mem.eql(u8, ext, e)) break true;
-            } else false;
-            if (include_file) {
-                try sources.append(b.allocator, b.dupe(entry.name));
-            }
-        }
-    }
-
-    return .{ .files = sources.items, .root = options.root, .flags = options.flags, .language = options.language };
 }
