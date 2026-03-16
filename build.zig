@@ -170,13 +170,13 @@ pub fn build(b: *std.Build) !void {
     rive_renderer_mod.addIncludePath(upstream.path("renderer/glad"));
     rive_renderer_mod.addIncludePath(upstream.path("decoders/include"));
 
-    if (linux) {
-        const libjpeg = b.dependency("libjpeg", .{});
-        rive_renderer_mod.linkLibrary(libjpeg.artifact("jpeg"));
-        const libpng = b.dependency("libpng", .{});
-        rive_renderer_mod.linkLibrary(libpng.artifact("png"));
-        libwebp.build(b, target, optimize, rive_renderer_mod);
-    }
+    // if (linux) {
+    const libjpeg = b.dependency("libjpeg", .{});
+    rive_renderer_mod.linkLibrary(libjpeg.artifact("jpeg"));
+    const libpng = b.dependency("libpng", .{});
+    rive_renderer_mod.linkLibrary(libpng.artifact("png"));
+    libwebp.build(b, target, optimize, rive_renderer_mod);
+    // }
 
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/src"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
@@ -341,6 +341,7 @@ pub fn build(b: *std.Build) !void {
         // path_fiddle.root_module.addIncludePath(vulkan_memory_allocator.path("include"));
         path_fiddle.root_module.addIncludePath(upstream.path("renderer/rive_vk_bootstrap/include"));
         path_fiddle.root_module.addIncludePath(upstream.path("renderer/shader_hotload"));
+
         // path_fiddle.root_module.linkSystemLibrary("GL", .{});
         // const opengl_headers = b.lazyDependency("mesa", .{}).?.path("include");
         // path_fiddle.root_module.addIncludePath(opengl_headers);
@@ -352,6 +353,7 @@ pub fn build(b: *std.Build) !void {
     path_fiddle.linkLibrary(glfw_lib);
 
     path_fiddle.addSystemIncludePath(linuxDeps.path("include"));
+
     //
     // if (target.query.isNative()) {
     //     path_fiddle.root_module.linkSystemLibrary("jpeg", .{});
