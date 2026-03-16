@@ -11,6 +11,9 @@ const yoga = @import("src/yoga.zig");
 const sheenbidi = @import("src/sheenbidi.zig");
 const harfbuzz = @import("src/harfbuzz.zig");
 const luau = @import("src/luau.zig");
+// const libpng = @import("src/libpng.zig");
+// const libjpeg = @import("src/libjpeg.zig");
+const libwebp = @import("src/libwebp.zig");
 
 pub const rive_options = &.{
     "no-scripting",
@@ -33,12 +36,13 @@ pub fn build(b: *std.Build) !void {
     ) orelse .ReleaseSmall;
 
     const glfw = b.dependency("glfw", .{
-        //GLFW is needed for path fiddle
         .target = target,
         .optimize = optimize,
     });
 
     const glfw_lib = glfw.artifact("glfw");
+
+    const linuxDeps = b.dependency("sdl_linux_deps", .{});
 
     var windows = false;
     var linux = false;
@@ -63,7 +67,7 @@ pub fn build(b: *std.Build) !void {
                 library_path = .{ .cwd_relative = "/usr/lib" };
                 // glfw_lib.addSystemIncludePath(.{ .cwd_relative = b.pathJoin(&.{ sysroot, "usr/include" }) });
                 // glfw_lib.addFrameworkPath(.{ .cwd_relative = b.pathJoin(&.{ sysroot, "System/Library/Frameworks" }) });
-                glfw_lib.addLibraryPath(library_path.?);
+                // glfw_lib.addLibraryPath(library_path.?);
             } else if (!target.query.isNative()) {
                 std.log.err("'--sysroot' is required when building the Rive Renderer for non-native macOS targets. Use xcrun --show-sdk-path.", .{});
                 std.process.exit(1);
@@ -83,8 +87,6 @@ pub fn build(b: *std.Build) !void {
     const upstream = b.dependency("rive", .{});
 
     //********RIVE CORE**********
-
-    // dependency links
 
     const rive_mod = b.createModule(.{
         .target = target,
@@ -109,9 +111,13 @@ pub fn build(b: *std.Build) !void {
     harfbuzz.build(b, target, optimize, rive_mod);
     try luau.build(b, target, optimize, rive_mod);
 
+    // const libpng = b.dependency("libpng", .{});
+    // rive_mod.linkLibrary(libpng.artifact("png"));
+
     rive_mod.addIncludePath(upstream.path("include"));
     rive_mod.addIncludePath(upstream.path("dependencies"));
     // rive_mod.addIncludePath(upstream.path("scripting"));
+
     rive_lib.installHeadersDirectory(upstream.path("include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
 
     //compile Rive source
@@ -142,6 +148,9 @@ pub fn build(b: *std.Build) !void {
 
     InstallArtifactFmt(rive_renderer_lib);
 
+    //TODO: Make this optional
+    rive_renderer_mod.addCMacro("RIVE_DECODERS", "");
+
     // Set the include path
 
     //compile Rive Renderer
@@ -156,6 +165,15 @@ pub fn build(b: *std.Build) !void {
     rive_renderer_mod.addIncludePath(upstream.path("renderer/src"));
     rive_renderer_mod.addIncludePath(upstream.path("renderer/glad/include"));
     rive_renderer_mod.addIncludePath(upstream.path("renderer/glad"));
+    rive_renderer_mod.addIncludePath(upstream.path("decoders/include"));
+
+    // TODO: maybe make it so bitmap libraries are only needed if non-native build?
+
+    const libjpeg = b.dependency("libjpeg", .{});
+    rive_renderer_mod.linkLibrary(libjpeg.artifact("jpeg"));
+    const libpng = b.dependency("libpng", .{});
+    rive_renderer_mod.linkLibrary(libpng.artifact("png"));
+    libwebp.build(b, target, optimize, rive_renderer_mod);
 
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/src"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
@@ -163,6 +181,9 @@ pub fn build(b: *std.Build) !void {
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/glad"), "", .{});
 
     rive_renderer_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("renderer/src"), .allowed_exts = &.{".cpp"}, .flags = &.{"-std=c++20"} })); //Zig's Debug mode will panic if c++ standard isn't set to 20+ due to a negative bitwise shift operation
+    //make this optional along with the rest of the decoder stuff
+    rive_renderer_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("decoders/src"), .allowed_exts = &.{".cpp"} }));
+
     if (macos) {
         rive_renderer_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/metal"),
@@ -316,14 +337,16 @@ pub fn build(b: *std.Build) !void {
         path_fiddle.root_module.addIncludePath(upstream.path("renderer/rive_vk_bootstrap/include"));
         path_fiddle.root_module.addIncludePath(upstream.path("renderer/shader_hotload"));
         // path_fiddle.root_module.linkSystemLibrary("GL", .{});
-        const opengl_headers = b.lazyDependency("mesa", .{}).?.path("include");
-        path_fiddle.root_module.addIncludePath(opengl_headers);
+        // const opengl_headers = b.lazyDependency("mesa", .{}).?.path("include");
+        // path_fiddle.root_module.addIncludePath(opengl_headers);
     }
     path_fiddle.linkLibrary(rive_renderer_lib);
     path_fiddle.linkLibrary(rive_lib);
 
     path_fiddle.step.dependOn(&rive_renderer_lib.step);
     path_fiddle.linkLibrary(glfw_lib);
+
+    path_fiddle.addSystemIncludePath(linuxDeps.path("include"));
 
     if (system_framework_path) |path| {
         path_fiddle.addSystemFrameworkPath(path);

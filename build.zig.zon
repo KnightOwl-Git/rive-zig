@@ -55,10 +55,26 @@
             .url = "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/tarball/v3.3.0",
             .hash = "N-V-__8AAIutPgABk6NlXZhlJ5P8qVECvakZIKoO94h7xUOw",
         },
-        .mesa = .{
-            .url = "git+https://gitlab.freedesktop.org/mesa/mesa.git#5a84a6b775ba7cd855bd3ce019cf75b98859f527",
-            .hash = "N-V-__8AAJ1n4BU4TdZhPiZ17cG_BV3j4Tgw43C2b1kse5fe",
-            .lazy = true,
+        // .mesa = .{
+        //     .url = "git+https://gitlab.freedesktop.org/mesa/mesa.git#5a84a6b775ba7cd855bd3ce019cf75b98859f527",
+        //     .hash = "N-V-__8AAJ1n4BU4TdZhPiZ17cG_BV3j4Tgw43C2b1kse5fe",
+        //     .lazy = true,
+        // },
+        .libjpeg = .{
+            .url = "https://github.com/timsurber/libjpeg/archive/refs/heads/main.zip",
+            .hash = "libjpeg-9.6.0-amT3U_ERAAA98tsTqQud6cjW_qxb6r2trEls6qJosP2I",
+        },
+        .libpng = .{
+            .url = "git+https://github.com/allyourcodebase/libpng#4783adcb3b8ed0e3d5032a3434059be594755f57",
+            .hash = "libpng-1.6.53-oiaFGtwqAAB2XTxMgi4dG96BUO-0_BtUFtxKraIwq6-w",
+        },
+        .libwebp = .{
+            .url = "https://github.com/webmproject/libwebp/tarball/v1.4.0",
+            .hash = "N-V-__8AANi8eADiw0ejg469Q_mXU5ubPV56A0b6-qnlXauz",
+        },
+        .sdl_linux_deps = .{
+            .url = "git+https://github.com/castholm/SDL_linux_deps#fd349940b9dbaa0f221703b05df826d745d7ce2a",
+            .hash = "sdl_linux_deps-0.0.0-SDL_ltg8hgAOayMwFN6BhHW3Rs5UPtf6n8m-2qcQHuGS",
         },
     },
 

@@ -67,3 +67,28 @@ pub fn InstallArtifactFmt(artifact: *std.Build.Step.Compile) void {
 
     b.getInstallStep().dependOn(&pf_output.step);
 }
+
+pub const linkLang = enum { cpp, c, both, none };
+
+pub fn addRiveDep(b: *std.Build, name: []const u8, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, langs: linkLang) *std.Build.Step.Compile {
+    const dep_mod = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+    });
+    switch (langs) {
+        .c,
+        => dep_mod.link_libc = true,
+        .cpp,
+        => dep_mod.link_libc = true,
+        .both => {
+            dep_mod.link_libc = true;
+            dep_mod.link_libcpp = true;
+        },
+        .none => {},
+    }
+    return b.addLibrary(.{
+        .name = name,
+        .linkage = .static,
+        .root_module = dep_mod,
+    });
+}
