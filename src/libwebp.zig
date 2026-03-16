@@ -52,7 +52,7 @@ pub fn build(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
 
             // libwebpdspdecode_sse2_la_SOURCES =
             "dsp/alpha_processing_sse2.c",
-            "dsp/common_sse2.h",
+            // "dsp/common_sse2.h",
             "dsp/dec_sse2.c",
             "dsp/filters_sse2.c",
             "dsp/lossless_sse2.c",
@@ -66,7 +66,7 @@ pub fn build(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
             "dsp/dec_neon.c",
             "dsp/filters_neon.c",
             "dsp/lossless_neon.c",
-            "dsp/neon.h",
+            // "dsp/neon.h",
             "dsp/rescaler_neon.c",
             "dsp/upsampling_neon.c",
             "dsp/yuv_neon.c",
@@ -75,13 +75,13 @@ pub fn build(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
             "dsp/dec_msa.c",
             "dsp/filters_msa.c",
             "dsp/lossless_msa.c",
-            "dsp/msa_macro.h",
+            // "dsp/msa_macro.h",
             "dsp/rescaler_msa.c",
             "dsp/upsampling_msa.c",
 
             // libwebpdspdecode_mips32_la_SOURCES =
             "dsp/dec_mips32.c",
-            "dsp/mips_macro.h",
+            // "dsp/mips_macro.h",
             "dsp/rescaler_mips32.c",
             "dsp/yuv_mips32.c",
 
@@ -90,7 +90,7 @@ pub fn build(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
             "dsp/dec_mips_dsp_r2.c",
             "dsp/filters_mips_dsp_r2.c",
             "dsp/lossless_mips_dsp_r2.c",
-            "dsp/mips_macro.h",
+            // "dsp/mips_macro.h",
             "dsp/rescaler_mips_dsp_r2.c",
             "dsp/upsampling_mips_dsp_r2.c",
             "dsp/yuv_mips_dsp_r2.c",
@@ -126,7 +126,7 @@ pub fn build(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
 
             // COMMON_SOURCES =
             "utils/bit_reader_utils.c",
-            "utils/bit_reader_utils.h",
+            // "utils/bit_reader_utils.h",
             "utils/color_cache_utils.c",
             "utils/filters_utils.c",
             "utils/huffman_utils.c",

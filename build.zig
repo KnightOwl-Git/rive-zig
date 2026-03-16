@@ -150,6 +150,9 @@ pub fn build(b: *std.Build) !void {
 
     //TODO: Make this optional
     rive_renderer_mod.addCMacro("RIVE_DECODERS", "");
+    rive_renderer_mod.addCMacro("RIVE_PNG", "");
+    rive_renderer_mod.addCMacro("RIVE_JPEG", "");
+    rive_renderer_mod.addCMacro("RIVE_WEBP", "");
 
     // Set the include path
 
@@ -167,13 +170,13 @@ pub fn build(b: *std.Build) !void {
     rive_renderer_mod.addIncludePath(upstream.path("renderer/glad"));
     rive_renderer_mod.addIncludePath(upstream.path("decoders/include"));
 
-    // TODO: maybe make it so bitmap libraries are only needed if non-native build?
-
-    const libjpeg = b.dependency("libjpeg", .{});
-    rive_renderer_mod.linkLibrary(libjpeg.artifact("jpeg"));
-    const libpng = b.dependency("libpng", .{});
-    rive_renderer_mod.linkLibrary(libpng.artifact("png"));
-    libwebp.build(b, target, optimize, rive_renderer_mod);
+    if (linux) {
+        const libjpeg = b.dependency("libjpeg", .{});
+        rive_renderer_mod.linkLibrary(libjpeg.artifact("jpeg"));
+        const libpng = b.dependency("libpng", .{});
+        rive_renderer_mod.linkLibrary(libpng.artifact("png"));
+        libwebp.build(b, target, optimize, rive_renderer_mod);
+    }
 
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
     rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/src"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
@@ -310,13 +313,15 @@ pub fn build(b: *std.Build) !void {
 
     //Note: in order to build the Path Fiddle demo project on Linux, you must have OpenGL dev tools installed even though it will use vulkan by default (i.e. libGL-mesa-dev or equivalent)
     const path_fiddle = b.addExecutable(.{ .name = "path_fiddle", .root_module = b.createModule(.{
-        .link_libcpp = true,
         .target = target,
         .optimize = optimize,
+        .link_libcpp = true,
         .link_libc = true,
     }) });
 
     InstallArtifactFmt(path_fiddle);
+
+    path_fiddle.bundle_ubsan_rt = true;
 
     path_fiddle.root_module.addCSourceFiles(.{
         .files = &.{ "path_fiddle.cpp", "fiddle_context_gl.cpp", "fiddle_context_vulkan.cpp", "fiddle_context_dawn.cpp", "fiddle_context_d3d.cpp", "fiddle_context_d3d12.cpp" },
@@ -347,6 +352,12 @@ pub fn build(b: *std.Build) !void {
     path_fiddle.linkLibrary(glfw_lib);
 
     path_fiddle.addSystemIncludePath(linuxDeps.path("include"));
+    //
+    // if (target.query.isNative()) {
+    //     path_fiddle.root_module.linkSystemLibrary("jpeg", .{});
+    //     path_fiddle.root_module.linkSystemLibrary("png", .{});
+    //     path_fiddle.root_module.linkSystemLibrary("webp", .{});
+    // }
 
     if (system_framework_path) |path| {
         path_fiddle.addSystemFrameworkPath(path);
