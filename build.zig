@@ -140,7 +140,7 @@ pub fn build(b: *std.Build) !void {
     rive_mod.addCMacro("WITH_RIVE_TEXT", "");
     rive_mod.addCMacro("WITH_RIVE_LAYOUT", "");
     rive_mod.addCMacro("WITH_RIVE_SCRIPTING", "");
-    rive_mod.addCMacro("RIVE_CANVAS", "");
+    rive_mod.addCMacro("RIVE_CANVAS", "1");
     rive_mod.addCMacro("RIVE_ORE", "");
     rive_mod.addCMacro("ORE_BACKEND_METAL", "");
 
@@ -149,11 +149,13 @@ pub fn build(b: *std.Build) !void {
         rive_mod.addCSourceFiles(.{
             .root = upstream.path("src/lua"),
             .files = &.{ "renderer/lua_gpu_apple.mm", "lua_scripted_context_apple.mm" },
+            // .flags = &.{ "-DRIVE_CANVAS", "-DRIVE_ORE" },
         });
     } else {
         rive_mod.addCSourceFiles(.{
             .root = upstream.path("src/lua"),
             .files = &.{ "renderer/lua_gpu.cpp", "lua_scripted_context.cpp" },
+            // .flags = &.{ "-DRIVE_CANVAS", "-DRIVE_ORE" },
         });
     }
 
@@ -258,6 +260,10 @@ pub fn build(b: *std.Build) !void {
         .root = upstream.path("renderer/src/ore"),
         .allowed_exts = &.{".cpp"},
     }));
+    rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        .root = upstream.path("renderer/src/ore/gl"),
+        .allowed_exts = &.{".cpp"},
+    }));
 
     if (macos) {
         rive_renderer_mod.addCSourceFiles(try glob(b, .{
@@ -355,6 +361,7 @@ pub fn build(b: *std.Build) !void {
         rive_renderer_mod.addCMacro("ORE_BACKEND_D3D11", ""); // this is for rive's GPU canvas
         rive_renderer_mod.addCMacro("ORE_BACKEND_D3D12", ""); // this is for rive's GPU canvas
     } else if (linux) {}
+
     rive_renderer_mod.addCMacro("RIVE_DESKTOP_GL", "");
     rive_renderer_mod.addCMacro("ORE_BACKEND_VK", ""); // this is for rive's GPU canvas
     rive_renderer_mod.addCMacro("ORE_BACKEND_GL", ""); // this is for rive's GPU canvas
@@ -463,8 +470,8 @@ pub fn build(b: *std.Build) !void {
     path_fiddle.root_module.addCMacro("RIVE_DESKTOP_GL", "");
     path_fiddle.root_module.addCMacro("RIVE_CANVAS", "");
     path_fiddle.root_module.addCMacro("RIVE_ORE", "");
-    path_fiddle.root_module.addCMacro("ORE_BACKEND_METAL", "");
-    path_fiddle.root_module.addCMacro("ORE_BACKEND_GL", "");
+    // path_fiddle.root_module.addCMacro("ORE_BACKEND_METAL", "");
+    // path_fiddle.root_module.addCMacro("ORE_BACKEND_GL", "");
 
     if (macos) {
         path_fiddle.root_module.addCMacro("RIVE_MACOSX", "");
