@@ -7,6 +7,9 @@ pub const GlobOptions = struct {
     recursive: bool = false,
     flags: []const []const u8 = &.{},
     language: ?std.Build.Module.CSourceLanguage = null,
+    prefix: []const u8 = "",
+    exclude: []const []const u8 = &.{},
+    // sayYesYes: bool = false,
 };
 
 ///Import tons of c files at once!
@@ -18,14 +21,22 @@ pub fn glob(b: *std.Build, options: GlobOptions) !std.Build.Module.AddCSourceFil
 
     defer dir.close(io);
 
+    //see if we can not reuse so much code here
+
     if (options.recursive) {
         var walker = try dir.walk(b.allocator);
         while (try walker.next(io)) |entry| {
             const ext = Io.Dir.path.extension(entry.basename);
-            const include_file = for (options.allowed_exts) |e| {
+            const has_ext = for (options.allowed_exts) |e| {
                 if (std.mem.eql(u8, ext, e)) break true;
             } else false;
-            if (include_file) {
+            const has_prefix = std.mem.startsWith(u8, entry.basename, options.prefix);
+
+            const is_excluded = for (options.exclude) |excluded| {
+                if (std.mem.eql(u8, excluded, entry.basename)) break true;
+            } else false;
+
+            if (has_ext and has_prefix and !is_excluded) {
                 try sources.append(b.allocator, b.dupe(entry.path));
             }
         }
@@ -33,10 +44,17 @@ pub fn glob(b: *std.Build, options: GlobOptions) !std.Build.Module.AddCSourceFil
         var iterator = dir.iterate();
         while (try iterator.next(io)) |entry| {
             const ext = Io.Dir.path.extension(entry.name);
-            const include_file = for (options.allowed_exts) |e| {
+            const has_ext = for (options.allowed_exts) |e| {
                 if (std.mem.eql(u8, ext, e)) break true;
             } else false;
-            if (include_file) {
+            const has_prefix = std.mem.startsWith(u8, entry.name, options.prefix);
+            // if (options.sayYesYes and has_prefix) std.debug.print("fileyesyes: {s} \n", .{entry.name});
+            //
+            const is_excludeed = for (options.exclude) |excluded| {
+                if (std.mem.eql(u8, excluded, entry.name)) break true;
+            } else false;
+
+            if (has_ext and has_prefix and !is_excludeed) {
                 try sources.append(b.allocator, b.dupe(entry.name));
             }
         }

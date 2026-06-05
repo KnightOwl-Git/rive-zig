@@ -7,9 +7,9 @@
 
     .dependencies = .{
         .rive = .{
-            //last fetched 5/8/26
-            .url = "git+https://github.com/rive-app/rive-runtime#23c275e1dc2183a6d917a95e1917424c1c8eb464",
-            .hash = "N-V-__8AAGD4EwwrjjVVYyvTtqxtCS-A2dNOwKL3FN-66xxT",
+            //last fetched 6/4/26
+            .url = "https://github.com/rive-app/rive-runtime/archive/refs/tags/runtime-v0.1.108.tar.gz",
+            .hash = "N-V-__8AAM-OfAzwms3o82fG56_evr967jw1eFevi6DYtwqX",
         },
         //NOTE: python ply is no longer maintained - keep an eye out to see if Rive switches to something else
 
@@ -17,10 +17,6 @@
             .url = "git+https://github.com/dabeaz/ply.git#9d7c40099e23ff78f9d86ef69a26c1e8a83e706a",
             .hash = "N-V-__8AAH6kCADCwVtPle9Dn5-H1bFPsR6r-yUhIzrvI1Af",
         },
-        // .glfw = .{
-        //     .url = "git+https://github.com/allyourcodebase/glfw.git#79e7ba3d082765954b59c4f11a2f9b4ff1ecb350",
-        //     .hash = "glfw-0.0.0-R5AeUo0JGgBvENV2Oz-u0V_unpWhEJTfK4qckBH5da6e",
-        // },
         .harfbuzz = .{
             .url = "https://github.com/rive-app/harfbuzz/tarball/rive_13.1.1",
             .hash = "N-V-__8AAKRr0wX-LmkhKHJpyevrbB7LtHGnuNjgmA7jALxo",
@@ -35,8 +31,8 @@
             .hash = "N-V-__8AANupEwHXvbeQLcLdZQ3WXMgqkgR03hg8pV843VL0",
         },
         .luau = .{
-            .url = "https://github.com/luigi-rosso/luau/tarball/rive_0_33",
-            .hash = "N-V-__8AAJHAsQD4olFtTzeo2TF4M57mK_1LiL_aWyT_6acO",
+            .url = "https://github.com/luigi-rosso/luau/tarball/rive_0_36",
+            .hash = "N-V-__8AAF9XvQBW4cvbk5Eql5TQ3W9pgC8Asxi4QHEcxtQH",
         },
 
         .libhydrogen = .{
@@ -79,6 +75,22 @@
         .libjpeg = .{
             .url = "https://github.com/rive-app/libjpeg/tarball/v9f",
             .hash = "N-V-__8AAGj4RgDK9CUGtGo8KZkYNglCSjgu5NtDJJsoNJeZ",
+        },
+        .glfw = .{
+            .url = "git+https://github.com/zig-gamedev/zglfw#51003c105d23db378bb59ce415a387b22f1b0892",
+            .hash = "zglfw-0.10.0-dev-zgVDNIy4IQDJNRy4jrP1As-SZxfJpuWhU1iJ-wBab_VD",
+        },
+        .bc7enc_rdo = .{
+            .url = "git+https://github.com/richgel999/bc7enc_rdo#dbe416d28a5530b4e8cc45b14bf034dc6b96bbde",
+            .hash = "N-V-__8AABeQbgKLULJ4dF965TihCQ06JWCBPbfaxAZfvsuh",
+        },
+        .ETCPACK = .{
+            .url = "git+https://github.com/Ericsson/ETCPACK#14a64d9d19318fb9f81ce339b7103ffa0f1781d7",
+            .hash = "N-V-__8AADILYwAxM2ztzNQzzD7Rhr78s_Rt4G-kcB5zrOzA",
+        },
+        .astc_encoder = .{
+            .url = "https://github.com/ARM-software/astc-encoder/archive/refs/tags/4.7.0.tar.gz",
+            .hash = "N-V-__8AAOnrkgKqdIqNfzLoe6HXUAiXt03yXSJSwthCo-Sg",
         },
     },
 
