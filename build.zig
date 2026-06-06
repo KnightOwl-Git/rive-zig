@@ -131,6 +131,7 @@ pub fn build(b: *std.Build) !void {
             "lua/renderer/lua_gpu.cpp",
         },
     }));
+    rive_mod.addCSourceFiles(.{ .files = &.{"no_op_factory.cpp"}, .root = upstream.path("utils") });
     // rive_mod.addCSourceFiles(.{ .files = &riveSource.rive_src, .root = upstream.path("src") });
 
     rive_mod.addCMacro("_RIVE_INTERNAL_", "");
