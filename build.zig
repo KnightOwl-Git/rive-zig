@@ -243,6 +243,7 @@ pub fn build(b: *std.Build) !void {
     // rive_renderer_mod.linkLibrary(libjpeg.artifact("jpeg"));
     const libpng = b.dependency("libpng", .{});
     rive_renderer_mod.linkLibrary(libpng.artifact("png"));
+    libpng.artifact("png").bundle_ubsan_rt = true;
     libwebp.build(b, target, optimize, rive_renderer_mod);
     libjpeg.build(b, target, optimize, rive_mod);
     // }
