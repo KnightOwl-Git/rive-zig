@@ -122,10 +122,16 @@ pub fn build(b: *std.Build) !void {
     rive_lib.installHeadersDirectory(upstream.path("include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
 
     //compile Rive source
-    rive_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("src"), .allowed_exts = &.{".cpp"}, .recursive = true, .exclude = &.{
-        "lua/lua_scripted_context.cpp",
-        "lua/renderer/lua_gpu.cpp",
-    }, .flags = &.{"-fno-sanitize=pointer-overflow"} }));
+    rive_mod.addCSourceFiles(try glob(b, .{
+        .root = upstream.path("src"),
+        .allowed_exts = &.{".cpp"},
+        .recursive = true,
+        .exclude = &.{
+            "lua_scripted_context.cpp",
+            "lua_gpu.cpp",
+        },
+        .flags = &.{"-fno-sanitize=pointer-overflow"}, //seems like this is necessary for text to work??
+    }));
     rive_mod.addCSourceFiles(.{ .files = &.{"no_op_factory.cpp"}, .root = upstream.path("utils") });
     // rive_mod.addCSourceFiles(.{ .files = &riveSource.rive_src, .root = upstream.path("src") });
 
@@ -401,6 +407,37 @@ pub fn build(b: *std.Build) !void {
     }
     rive_renderer_lib.step.dependOn(&make_cmd.step);
     rive_renderer_mod.addIncludePath(b.path("zig-out/include"));
+
+    // merge if shared library. Not working atm
+
+    // if (linkage == .dynamic) {
+    // const core_obj = b.addObject(.{
+    //     .name = "rive-core-obj",
+    //     .root_module = rive_mod,
+    // });
+    //
+    // const renderer_obj = b.addObject(.{
+    //     .name = "rive_renderer_obj",
+    //     .root_module = rive_renderer_mod,
+    // });
+    // const combined_mod = b.addModule(
+    //     "rive_combined",
+    //     .{
+    //         .target = target,
+    //         .optimize = optimize,
+    //     },
+    // );
+    // combined_mod.addObject(core_obj);
+    // combined_mod.addObject(renderer_obj);
+    //
+    // const combined_lib = b.addLibrary(.{
+    //     .name = "rive_all_lib",
+    //     .root_module = combined_mod,
+    //     .linkage = .dynamic,
+    // });
+    // b.installArtifact(combined_lib);
+    //
+    // }
 
     // *****PATH FIDDLE*******
 

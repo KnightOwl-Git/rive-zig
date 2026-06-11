@@ -9,7 +9,7 @@ pub const GlobOptions = struct {
     language: ?std.Build.Module.CSourceLanguage = null,
     prefix: []const u8 = "",
     exclude: []const []const u8 = &.{},
-    // sayYesYes: bool = false,
+    sayFileNames: bool = false,
 };
 
 ///Import tons of c files at once!
@@ -37,6 +37,7 @@ pub fn glob(b: *std.Build, options: GlobOptions) !std.Build.Module.AddCSourceFil
             } else false;
 
             if (has_ext and has_prefix and !is_excluded) {
+                if (options.sayFileNames) std.debug.print("linkedFile: {s} \n", .{entry.basename});
                 try sources.append(b.allocator, b.dupe(entry.path));
             }
         }
@@ -48,7 +49,6 @@ pub fn glob(b: *std.Build, options: GlobOptions) !std.Build.Module.AddCSourceFil
                 if (std.mem.eql(u8, ext, e)) break true;
             } else false;
             const has_prefix = std.mem.startsWith(u8, entry.name, options.prefix);
-            // if (options.sayYesYes and has_prefix) std.debug.print("fileyesyes: {s} \n", .{entry.name});
             //
             const is_excludeed = for (options.exclude) |excluded| {
                 if (std.mem.eql(u8, excluded, entry.name)) break true;
