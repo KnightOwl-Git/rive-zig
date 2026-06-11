@@ -1,4 +1,4 @@
-///based on allyourcodebases/SDL3 and Castholm's version
+///based on allyourcddebases/SDL3 and Castholm's version
 const std = @import("std");
 const util = @import("src/util.zig");
 const glob = util.glob;
@@ -122,15 +122,10 @@ pub fn build(b: *std.Build) !void {
     rive_lib.installHeadersDirectory(upstream.path("include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
 
     //compile Rive source
-    rive_mod.addCSourceFiles(try glob(b, .{
-        .root = upstream.path("src"),
-        .allowed_exts = &.{".cpp"},
-        .recursive = true,
-        .exclude = &.{
-            "lua/lua_scripted_context.cpp",
-            "lua/renderer/lua_gpu.cpp",
-        },
-    }));
+    rive_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("src"), .allowed_exts = &.{".cpp"}, .recursive = true, .exclude = &.{
+        "lua/lua_scripted_context.cpp",
+        "lua/renderer/lua_gpu.cpp",
+    }, .flags = &.{"-fno-sanitize=pointer-overflow"} }));
     rive_mod.addCSourceFiles(.{ .files = &.{"no_op_factory.cpp"}, .root = upstream.path("utils") });
     // rive_mod.addCSourceFiles(.{ .files = &riveSource.rive_src, .root = upstream.path("src") });
 
