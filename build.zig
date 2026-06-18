@@ -140,6 +140,7 @@ pub fn build(b: *std.Build) !void {
     //TODO: Make macros optional
 
     rive_mod.addCMacro("WITH_RIVE_TEXT", "");
+    rive_mod.addCMacro("WITH_RIVE_TOOLS", "1");
     rive_mod.addCMacro("WITH_RIVE_LAYOUT", "");
     rive_mod.addCMacro("WITH_RIVE_SCRIPTING", "");
     rive_mod.addCMacro("RIVE_CANVAS", "1");
