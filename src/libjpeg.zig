@@ -89,6 +89,7 @@ pub fn build(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
     }, .root = upstream.path("") });
 
     libjpeg.root_module.addIncludePath(upstream.path(""));
+    libjpeg.installHeadersDirectory(upstream.path(""), "", .{});
     // mod.addIncludePath(upstream.path(""));
     mod.linkLibrary(libjpeg);
 }

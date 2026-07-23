@@ -23,6 +23,8 @@ pub const rive_options = &.{
     "no-audio",
 };
 
+//TODO: remove redundancies between core and renderer now that I've merged the libraries
+
 pub fn build(b: *std.Build) !void {
     //Rive is being pulled from github here
 
@@ -101,6 +103,8 @@ pub fn build(b: *std.Build) !void {
         .linkage = linkage,
     });
 
+    rive_lib.linker_allow_shlib_undefined = true;
+
     InstallArtifactFmt(rive_lib);
 
     //optional dependencies
@@ -164,29 +168,13 @@ pub fn build(b: *std.Build) !void {
 
     //******RIVE RENDERER*******
 
-    const rive_renderer_mod = b.createModule(.{
-        .target = target,
-        .optimize = optimize,
-        .link_libcpp = true,
-        .link_libc = true,
-    });
-
-    const rive_renderer_lib = b.addLibrary(.{
-        .name = "rive_renderer",
-        .root_module = rive_renderer_mod,
-        .linkage = linkage,
-    });
-
-    InstallArtifactFmt(rive_renderer_lib);
-
     //TODO: Make this optional
-    rive_renderer_mod.addCMacro("RIVE_DECODERS", "");
-    rive_renderer_mod.addCMacro("RIVE_PNG", "");
-    rive_renderer_mod.addCMacro("RIVE_JPEG", "");
-    rive_renderer_mod.addCMacro("RIVE_WEBP", "");
-    rive_renderer_mod.addCMacro("RIVE_CANVAS", "");
-    rive_renderer_mod.addCMacro("RIVE_ORE", "");
-    rive_renderer_mod.addCMacro("ORE_BACKEND_GL", ""); // this is for rive's GPU canvas
+    rive_mod.addCMacro("RIVE_DECODERS", "");
+    rive_mod.addCMacro("RIVE_PNG", "");
+    rive_mod.addCMacro("RIVE_JPEG", "");
+    rive_mod.addCMacro("RIVE_WEBP", "");
+    rive_mod.addCMacro("RIVE_ORE", "");
+    rive_mod.addCMacro("ORE_BACKEND_GL", ""); // this is for rive's GPU canvas
     // Set the include path
 
     //compile Rive Renderer
@@ -201,128 +189,115 @@ pub fn build(b: *std.Build) !void {
     const bc_encoder = b.dependency("bc7enc_rdo", .{});
     // const etc_encoder = b.dependency("ETCPACK", .{});
 
-    rive_renderer_mod.addIncludePath(astc_encoder.path("source"));
-    rive_renderer_mod.addIncludePath(bc_encoder.path(""));
-    // rive_renderer_mod.addIncludePath(etc_encoder.path("source"));
+    rive_mod.addIncludePath(astc_encoder.path("source"));
+    rive_mod.addIncludePath(bc_encoder.path(""));
+    // rive_mod.addIncludePath(etc_encoder.path("source"));
 
     //build astc encoder
-    rive_renderer_mod.addCSourceFiles(try glob(b, .{
+    rive_mod.addCSourceFiles(try glob(b, .{
         .root = astc_encoder.path("source"),
         .allowed_exts = &.{".cpp"},
         .prefix = "astcenc_",
-        // .sayYesYes = true,
-        // .flags = &.{
-        //     //Idk if these are necessary
-        //     "-Wno-sign-conversion",
-        //     "-Wno-implicit-int-float-conversion",
-        //     "-Wno-float-conversion",
-        //     "-Wno-shorten-64-to-32",
-        //     "-Wno-unused-variable",
-        //     "-Wno-unused-function",
-        //     "-Wno-shadow",
-        //     "-Wno-missing-field-initializers",
-        // },
     }));
 
     //build bc encoder
 
-    rive_renderer_mod.addCSourceFiles(.{ .root = bc_encoder.path(""), .files = &.{
+    rive_mod.addCSourceFiles(.{ .root = bc_encoder.path(""), .files = &.{
         "bc7decomp.cpp",
         "bc7decomp_ref.cpp",
         "rgbcx.cpp",
     } });
 
-    rive_renderer_mod.linkLibrary(rive_lib);
-    rive_renderer_mod.addIncludePath(upstream.path("renderer/include"));
-    rive_renderer_mod.addIncludePath(upstream.path("renderer/src"));
-    rive_renderer_mod.addIncludePath(upstream.path("renderer/ore/metal"));
-    rive_renderer_mod.addIncludePath(upstream.path("renderer/glad/include"));
-    rive_renderer_mod.addIncludePath(upstream.path("renderer/glad"));
-    rive_renderer_mod.addIncludePath(upstream.path("decoders/include"));
+    rive_mod.addIncludePath(upstream.path("renderer/include"));
+    rive_mod.addIncludePath(upstream.path("renderer/src"));
+    rive_mod.addIncludePath(upstream.path("renderer/ore/metal"));
+    rive_mod.addIncludePath(upstream.path("renderer/glad/include"));
+    rive_mod.addIncludePath(upstream.path("renderer/glad"));
+    rive_mod.addIncludePath(upstream.path("decoders/include"));
 
     // if (linux) {
     // const libjpeg = b.dependency("libjpeg", .{});
-    // rive_renderer_mod.linkLibrary(libjpeg.artifact("jpeg"));
+    // rive_mod.linkLibrary(libjpeg.artifact("jpeg"));
     const libpng = b.dependency("libpng", .{});
-    rive_renderer_mod.linkLibrary(libpng.artifact("png"));
+    rive_mod.linkLibrary(libpng.artifact("png"));
     libpng.artifact("png").bundle_ubsan_rt = true;
-    libwebp.build(b, target, optimize, rive_renderer_mod);
+    libwebp.build(b, target, optimize, rive_mod);
     libjpeg.build(b, target, optimize, rive_mod);
     // }
 
-    rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
-    rive_renderer_lib.installHeadersDirectory(upstream.path("decoders/include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
-    rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/src"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
-    rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/glad/include"), "", .{});
-    rive_renderer_lib.installHeadersDirectory(upstream.path("renderer/glad"), "", .{});
+    rive_lib.installHeadersDirectory(upstream.path("renderer/include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
+    rive_lib.installHeadersDirectory(upstream.path("decoders/include"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
+    rive_lib.installHeadersDirectory(upstream.path("renderer/src"), "", .{ .include_extensions = &.{ ".h", ".hpp" } });
+    rive_lib.installHeadersDirectory(upstream.path("renderer/glad/include"), "", .{});
+    rive_lib.installHeadersDirectory(upstream.path("renderer/glad"), "", .{});
 
-    rive_renderer_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("renderer/src"), .allowed_exts = &.{".cpp"}, .flags = &.{"-std=c++20"} })); //Zig's Debug mode will panic if c++ standard isn't set to 20+ due to a negative bitwise shift operation
+    rive_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("renderer/src"), .allowed_exts = &.{".cpp"}, .flags = &.{"-std=c++20"} })); //Zig's Debug mode will panic if c++ standard isn't set to 20+ due to a negative bitwise shift operation
     //make this optional along with the rest of the decoder stuff
-    rive_renderer_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("decoders/src"), .allowed_exts = &.{".cpp"} }));
+    rive_mod.addCSourceFiles(try glob(b, .{ .root = upstream.path("decoders/src"), .allowed_exts = &.{".cpp"} }));
 
-    rive_renderer_mod.addCSourceFiles(try glob(b, .{
+    rive_mod.addCSourceFiles(try glob(b, .{
         .root = upstream.path("renderer/src/ore"),
         .allowed_exts = &.{".cpp"},
     }));
-    rive_renderer_mod.addCSourceFiles(try glob(b, .{
+    rive_mod.addCSourceFiles(try glob(b, .{
         .root = upstream.path("renderer/src/ore/gl"),
         .allowed_exts = &.{".cpp"},
     }));
 
     if (macos) {
-        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/metal"),
             .allowed_exts = &.{".mm"},
         }));
-        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/ore/metal"),
             .allowed_exts = &.{".mm"},
         }));
     } else if (windows) {
-        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/vulkan"),
             .allowed_exts = &.{".mm"},
         }));
 
-        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/d3d"),
             .allowed_exts = &.{".cpp"},
         }));
 
-        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/d3d11"),
             .allowed_exts = &.{".cpp"},
         }));
 
-        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/d3d12"),
             .allowed_exts = &.{".cpp"},
         }));
 
         //TODO: Add ORE if rive canvas enabled
     } else if (linux) {
-        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/vulkan"),
             .allowed_exts = &.{".cpp"},
         }));
 
-        rive_renderer_mod.addCSourceFiles(try glob(b, .{
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/rive_vk_bootstrap/src"),
             .allowed_exts = &.{".cpp"},
         }));
 
-        rive_renderer_mod.addCMacro("RIVE_VULKAN", "");
-        rive_renderer_mod.addCMacro("VK_NO_PROTOTYPES", "");
-        rive_renderer_mod.addCMacro("VMA_STATIC_VULKAN_FUNCTIONS", "0");
-        rive_renderer_mod.addCMacro("VMA_DYNAMIC_VULKAN_FUNCTIONS", "1");
+        rive_mod.addCMacro("RIVE_VULKAN", "");
+        rive_mod.addCMacro("VK_NO_PROTOTYPES", "");
+        rive_mod.addCMacro("VMA_STATIC_VULKAN_FUNCTIONS", "0");
+        rive_mod.addCMacro("VMA_DYNAMIC_VULKAN_FUNCTIONS", "1");
 
-        rive_renderer_mod.addIncludePath(vulkan_headers.path("include"));
-        rive_renderer_mod.addIncludePath(vulkan_memory_allocator.path("include"));
-        rive_renderer_mod.addIncludePath(upstream.path("renderer/rive_vk_bootstrap/include"));
-        rive_renderer_mod.addIncludePath(upstream.path("renderer/shader_hotload"));
-        rive_renderer_mod.addCSourceFile(.{ .file = upstream.path("renderer/shader_hotload/shader_hotload.cpp") });
+        rive_mod.addIncludePath(vulkan_headers.path("include"));
+        rive_mod.addIncludePath(vulkan_memory_allocator.path("include"));
+        rive_mod.addIncludePath(upstream.path("renderer/rive_vk_bootstrap/include"));
+        rive_mod.addIncludePath(upstream.path("renderer/shader_hotload"));
+        rive_mod.addCSourceFile(.{ .file = upstream.path("renderer/shader_hotload/shader_hotload.cpp") });
     }
-    rive_renderer_mod.addCSourceFiles(.{ .root = upstream.path("renderer"), .files = &.{
+    rive_mod.addCSourceFiles(.{ .root = upstream.path("renderer"), .files = &.{
         "src/gl/gl_state.cpp",
         "src/gl/gl_utils.cpp",
         "src/gl/load_store_actions_ext.cpp",
@@ -339,36 +314,38 @@ pub fn build(b: *std.Build) !void {
     // platform specific links
 
     if (system_include_path) |path| {
-        rive_renderer_mod.addSystemIncludePath(path);
+        rive_mod.addSystemIncludePath(path);
     }
 
     if (system_framework_path) |path| {
-        rive_renderer_mod.addSystemFrameworkPath(path);
+        rive_mod.addSystemFrameworkPath(path);
     }
     if (library_path) |path| {
-        rive_renderer_mod.addLibraryPath(path);
+        rive_mod.addLibraryPath(path);
     }
 
-    rive_renderer_mod.addCMacro("RIVE_ORE", ""); // this is for rive's GPU canvas. Make this optional, and also decouple it from target
+    rive_mod.addCMacro("RIVE_ORE", ""); // this is for rive's GPU canvas. Make this optional, and also decouple it from target
 
     if (macos) {
-        rive_renderer_mod.addCMacro("RIVE_MACOSX", "");
-        rive_renderer_mod.addCMacro("ORE_BACKEND_METAL", ""); // this is for rive's GPU canvas. Make this optional, and also decouple it from target
+        rive_mod.addCMacro("RIVE_MACOSX", "");
+        rive_mod.addCMacro("ORE_BACKEND_METAL", ""); // this is for rive's GPU canvas. Make this optional, and also decouple it from target
 
-        rive_renderer_mod.linkFramework("Metal", .{});
-        rive_renderer_mod.linkFramework("Foundation", .{});
-        rive_renderer_mod.linkFramework("QuartzCore", .{});
-        rive_renderer_mod.linkFramework("IOKit", .{});
-        rive_renderer_mod.linkSystemLibrary("objc", .{});
+        // rive_mod.linkFramework("Metal", .{});
+        // rive_mod.linkFramework("Foundation", .{});
+        // rive_mod.linkFramework("CoreGraphics", .{});
+        // rive_mod.linkFramework("ImageIO", .{});
+        // rive_mod.linkFramework("QuartzCore", .{});
+        // rive_mod.linkFramework("IOKit", .{});
+        // rive_mod.linkSystemLibrary("objc", .{});
     } else if (windows) {
-        rive_renderer_mod.addIncludePath(dx12_headers.path("include/directx"));
-        rive_renderer_mod.addCMacro("ORE_BACKEND_D3D11", ""); // this is for rive's GPU canvas
-        rive_renderer_mod.addCMacro("ORE_BACKEND_D3D12", ""); // this is for rive's GPU canvas
+        rive_mod.addIncludePath(dx12_headers.path("include/directx"));
+        rive_mod.addCMacro("ORE_BACKEND_D3D11", ""); // this is for rive's GPU canvas
+        rive_mod.addCMacro("ORE_BACKEND_D3D12", ""); // this is for rive's GPU canvas
     } else if (linux) {}
 
-    rive_renderer_mod.addCMacro("RIVE_DESKTOP_GL", "");
-    rive_renderer_mod.addCMacro("ORE_BACKEND_VK", ""); // this is for rive's GPU canvas
-    rive_renderer_mod.addCMacro("ORE_BACKEND_GL", ""); // this is for rive's GPU canvas
+    rive_mod.addCMacro("RIVE_DESKTOP_GL", "");
+    rive_mod.addCMacro("ORE_BACKEND_VK", ""); // this is for rive's GPU canvas
+    rive_mod.addCMacro("ORE_BACKEND_GL", ""); // this is for rive's GPU canvas
 
     //compile Rive shaders for renderer
 
@@ -406,39 +383,8 @@ pub fn build(b: *std.Build) !void {
     } else if (linux) {
         make_cmd.addArg("spirv");
     }
-    rive_renderer_lib.step.dependOn(&make_cmd.step);
-    rive_renderer_mod.addIncludePath(b.path("zig-out/include"));
-
-    // merge if shared library. Not working atm
-
-    // if (linkage == .dynamic) {
-    // const core_obj = b.addObject(.{
-    //     .name = "rive-core-obj",
-    //     .root_module = rive_mod,
-    // });
-    //
-    // const renderer_obj = b.addObject(.{
-    //     .name = "rive_renderer_obj",
-    //     .root_module = rive_renderer_mod,
-    // });
-    // const combined_mod = b.addModule(
-    //     "rive_combined",
-    //     .{
-    //         .target = target,
-    //         .optimize = optimize,
-    //     },
-    // );
-    // combined_mod.addObject(core_obj);
-    // combined_mod.addObject(renderer_obj);
-    //
-    // const combined_lib = b.addLibrary(.{
-    //     .name = "rive_all_lib",
-    //     .root_module = combined_mod,
-    //     .linkage = .dynamic,
-    // });
-    // b.installArtifact(combined_lib);
-    //
-    // }
+    rive_lib.step.dependOn(&make_cmd.step);
+    rive_mod.addIncludePath(b.path("zig-out/include"));
 
     // *****PATH FIDDLE*******
 
@@ -483,20 +429,12 @@ pub fn build(b: *std.Build) !void {
         // path_fiddle.root_module.addIncludePath(opengl_headers);
     }
     path_fiddle.root_module.linkLibrary(rive_lib);
-    path_fiddle.root_module.linkLibrary(rive_renderer_lib);
 
-    path_fiddle.step.dependOn(&rive_renderer_lib.step);
+    path_fiddle.step.dependOn(&rive_lib.step);
 
     path_fiddle.root_module.linkLibrary(glfw.artifact("glfw"));
 
     path_fiddle.root_module.addSystemIncludePath(linuxDeps.path("include"));
-
-    //
-    // if (target.query.isNative()) {
-    //     path_fiddle.root_module.linkSystemLibrary("jpeg", .{});
-    //     path_fiddle.root_module.linkSystemLibrary("png", .{});
-    //     path_fiddle.root_module.linkSystemLibrary("webp", .{});
-    // }
 
     if (system_framework_path) |path| {
         path_fiddle.root_module.addSystemFrameworkPath(path);
@@ -505,8 +443,6 @@ pub fn build(b: *std.Build) !void {
     path_fiddle.root_module.addCMacro("RIVE_DESKTOP_GL", "");
     path_fiddle.root_module.addCMacro("RIVE_CANVAS", "");
     path_fiddle.root_module.addCMacro("RIVE_ORE", "");
-    // path_fiddle.root_module.addCMacro("ORE_BACKEND_METAL", "");
-    // path_fiddle.root_module.addCMacro("ORE_BACKEND_GL", "");
 
     if (macos) {
         path_fiddle.root_module.addCMacro("RIVE_MACOSX", "");
