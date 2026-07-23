@@ -1,7 +1,7 @@
 .{
     .name = .rive,
 
-    .version = "0.1.169",
+    .version = "0.1.208",
     .minimum_zig_version = "0.16.0",
     .fingerprint = 0xe3c90c03256b4441,
 
