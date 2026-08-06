@@ -1,13 +1,13 @@
 .{
     .name = .rive,
 
-    .version = "0.1.208",
+    .version = "0.1.252",
     .minimum_zig_version = "0.16.0",
     .fingerprint = 0xe3c90c03256b4441,
 
     .dependencies = .{
         .rive = .{
-            //last fetched 7/23/26
+            //last fetched 8/5/26
             .url = "https://github.com/rive-app/rive-runtime/archive/refs/tags/runtime-v0.1.252.tar.gz",
             .hash = "N-V-__8AAJp52Q428M2asqRhSaTmrRbL5witjJ3ODOMUxWU1",
         },
