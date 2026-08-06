@@ -8,8 +8,8 @@
     .dependencies = .{
         .rive = .{
             //last fetched 7/23/26
-            .url = "https://github.com/rive-app/rive-runtime/archive/refs/tags/runtime-v0.1.208.tar.gz",
-            .hash = "N-V-__8AAEo4Ig5BTOXRL1KicTn3QUsxZ2YwFO7Vv6c-qAqR",
+            .url = "https://github.com/rive-app/rive-runtime/archive/refs/tags/runtime-v0.1.252.tar.gz",
+            .hash = "N-V-__8AAJp52Q428M2asqRhSaTmrRbL5witjJ3ODOMUxWU1",
         },
         //NOTE: python ply is no longer maintained - keep an eye out to see if Rive switches to something else
 
@@ -23,8 +23,8 @@
         },
 
         .yoga = .{
-            .url = "https://github.com/rive-app/yoga/archive/rive_changes_v2_0_1_2.tar.gz",
-            .hash = "N-V-__8AAM2VVgCwroTrKUeYZbuSyNUsEuNhnq9mpSwtGlm3",
+            .url = "https://github.com/rive-app/yoga/archive/rive_changes_v2_0_1_2_grid.tar.gz",
+            .hash = "N-V-__8AAIlXXwAsyLMb8skfMM82JCz3i0C5JOlTXum1Hkwn",
         },
         .sheenbidi = .{
             .url = "https://github.com/Tehreer/SheenBidi/archive/refs/tags/v2.6.tar.gz",

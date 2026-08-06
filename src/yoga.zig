@@ -25,6 +25,8 @@ pub fn build(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
         "Yoga.cpp",
         "event/event.cpp",
         "log.cpp",
+        "YGGridTrackList.cpp",
+        "grid/GridLayout.cpp",
     }, .root = upstream.path("yoga") });
 
     yoga.root_module.addIncludePath(upstream.path(""));
