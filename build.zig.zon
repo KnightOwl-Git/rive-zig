@@ -1,15 +1,15 @@
 .{
     .name = .rive,
 
-    .version = "0.1.252",
+    .version = "0.1.260",
     .minimum_zig_version = "0.16.0",
     .fingerprint = 0xe3c90c03256b4441,
 
     .dependencies = .{
         .rive = .{
-            //last fetched 8/5/26
-            .url = "https://github.com/rive-app/rive-runtime/archive/refs/tags/runtime-v0.1.252.tar.gz",
-            .hash = "N-V-__8AAJp52Q428M2asqRhSaTmrRbL5witjJ3ODOMUxWU1",
+            //last fetched 8/9/26
+            .url = "https://github.com/rive-app/rive-runtime/archive/refs/tags/runtime-v0.1.260.tar.gz",
+            .hash = "N-V-__8AAIy96A6vTpY6rhZjzPrays-VU8IozZfm9WsOS0HX",
         },
         //NOTE: python ply is no longer maintained - keep an eye out to see if Rive switches to something else
 
