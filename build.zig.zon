@@ -7,9 +7,9 @@
 
     .dependencies = .{
         .rive = .{
-            //last fetched 8/9/26
-            .url = "https://github.com/rive-app/rive-runtime/archive/refs/tags/runtime-v0.1.260.tar.gz",
-            .hash = "N-V-__8AAIy96A6vTpY6rhZjzPrays-VU8IozZfm9WsOS0HX",
+            //last fetched 8/21/26
+            .url = "https://github.com/rive-app/rive-runtime/archive/refs/tags/runtime-v0.1.301.tar.gz",
+            .hash = "N-V-__8AAIS_lhI0r9vskFplrZmthefv_zzyYL98a4IdZYOi",
         },
         //NOTE: python ply is no longer maintained - keep an eye out to see if Rive switches to something else
 
