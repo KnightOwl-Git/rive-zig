@@ -31,13 +31,13 @@
             .hash = "N-V-__8AANupEwHXvbeQLcLdZQ3WXMgqkgR03hg8pV843VL0",
         },
         .luau = .{
-            .url = "https://github.com/luigi-rosso/luau/tarball/rive_0_36",
-            .hash = "N-V-__8AAF9XvQBW4cvbk5Eql5TQ3W9pgC8Asxi4QHEcxtQH",
+            .url = "https://github.com/luigi-rosso/luau/tarball/rive_0_734",
+            .hash = "N-V-__8AADQwCQGGGWmuVd4cbtSFYSxLCFmV-OKHHJHuYoi9",
         },
 
         .libhydrogen = .{
-            .url = "https://github.com/KnightOwl-Git/libhydrogen/tarball/rive_0_1",
-            .hash = "N-V-__8AAHsTAwB23khMfi2wOKr0T75w9lHgO5eG9OVwDR7p",
+            .url = "https://github.com/KnightOwl-Git/libhydrogen/tarball/rive_0_2",
+            .hash = "N-V-__8AANcUAwBaqf0qGiflftefwSsINZvU6ygsBS3_Tf9H",
         },
         .directX = .{
             .url = "https://github.com/microsoft/DirectX-Headers/tarball/v1.615.0",
