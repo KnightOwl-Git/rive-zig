@@ -147,6 +147,7 @@ pub fn build(b: *std.Build) !void {
     rive_mod.addCMacro("WITH_RIVE_TOOLS", "1");
     rive_mod.addCMacro("WITH_RIVE_LAYOUT", "");
     rive_mod.addCMacro("WITH_RIVE_SCRIPTING", "");
+    rive_mod.addCMacro("WITH_RIVE_SCRIPTING_LUAU", "");
     rive_mod.addCMacro("RIVE_CANVAS", "1");
     rive_mod.addCMacro("RIVE_ORE", "");
     rive_mod.addCMacro("ORE_BACKEND_METAL", "");
