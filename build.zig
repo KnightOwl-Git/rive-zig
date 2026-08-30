@@ -254,10 +254,20 @@ pub fn build(b: *std.Build) !void {
             .root = upstream.path("renderer/src/ore/metal"),
             .allowed_exts = &.{".mm"},
         }));
+
+        rive_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/ore/gl"),
+            .allowed_exts = &.{".mm"},
+        }));
     } else if (windows) {
         rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/vulkan"),
-            .allowed_exts = &.{".mm"},
+            .allowed_exts = &.{".cpp"},
+        }));
+
+        rive_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/ore/vulkan"),
+            .allowed_exts = &.{".cpp"},
         }));
 
         rive_mod.addCSourceFiles(try glob(b, .{
@@ -271,7 +281,17 @@ pub fn build(b: *std.Build) !void {
         }));
 
         rive_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/ore/d3d11"),
+            .allowed_exts = &.{".cpp"},
+        }));
+
+        rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/d3d12"),
+            .allowed_exts = &.{".cpp"},
+        }));
+
+        rive_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/ore/d3d12"),
             .allowed_exts = &.{".cpp"},
         }));
 
@@ -279,6 +299,11 @@ pub fn build(b: *std.Build) !void {
     } else if (linux) {
         rive_mod.addCSourceFiles(try glob(b, .{
             .root = upstream.path("renderer/src/vulkan"),
+            .allowed_exts = &.{".cpp"},
+        }));
+
+        rive_mod.addCSourceFiles(try glob(b, .{
+            .root = upstream.path("renderer/src/ore/vulkan"),
             .allowed_exts = &.{".cpp"},
         }));
 
@@ -407,7 +432,7 @@ pub fn build(b: *std.Build) !void {
     path_fiddle.bundle_ubsan_rt = true;
 
     path_fiddle.root_module.addCSourceFiles(.{
-        .files = &.{ "path_fiddle.cpp", "fiddle_context_gl.cpp", "fiddle_context_vulkan.cpp", "fiddle_context_dawn.cpp", "fiddle_context_d3d.cpp", "fiddle_context_d3d12.cpp" },
+        .files = &.{ "path_fiddle.cpp", "fiddle_context_gl.cpp", "fiddle_context_vulkan.cpp", "fiddle_context_dawn.cpp", "fiddle_context_d3d.cpp", "fiddle_context_d3d12.cpp", "fiddle_context.cpp" },
         .root = upstream.path("renderer/path_fiddle"),
     });
 
